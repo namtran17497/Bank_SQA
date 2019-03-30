@@ -1,1 +1,2 @@
-namtran	12345678
+namtran	
+12345678
