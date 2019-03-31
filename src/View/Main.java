@@ -17,13 +17,17 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -39,7 +43,7 @@ import javax.swing.table.TableModel;
 public class Main extends javax.swing.JFrame {
 
     //TableModel của 4 bảng ds sổ tk, ds sổ vay, ds lãi suất tk, ds lãi suất vay
-    DefaultTableModel modelS, modelL, modelSI, modelLI;
+    DefaultTableModel modelS, modelL, modelSI, modelLI, modeRP1, modeRP2;
     TableColumn columnSI, columnLI;
     //ds sổ tk
     ArrayList<Saving> savingList = new ArrayList<>();
@@ -65,10 +69,14 @@ public class Main extends javax.swing.JFrame {
         List.setSize(800, 400);
         Spec.setTitle("Cấu hình");
         Spec.setSize(700, 500);
+        Repost.setTitle("Báo cáo");
+        Repost.setSize(700, 500);
         modelS = (DefaultTableModel) saving_list.getModel();
         modelL = (DefaultTableModel) loan_list.getModel();
         modelSI = (DefaultTableModel) saving_interest.getModel();
         modelLI = (DefaultTableModel) loan_interest.getModel();
+        modeRP1 = (DefaultTableModel) saving_list2.getModel();
+        modeRP2 = (DefaultTableModel) loan_list2.getModel();
         columnSI = saving_interest.getColumnModel().getColumn(1);
         columnLI = loan_interest.getColumnModel().getColumn(1);
         JComboBox amountCB = new JComboBox();
@@ -142,6 +150,157 @@ public class Main extends javax.swing.JFrame {
         }
     }
 
+    //Hiển thị báo cáo
+    public void showRepost(String ngay, int check){
+        savingList = saving();
+        loanList = loan();
+        modeRP1.setRowCount(0);
+        modeRP2.setRowCount(0);
+        Date date1 = null;
+        Date date2 = null;
+        String timeStamp = new SimpleDateFormat("dd/MM/yyyy").format(Calendar.getInstance().getTime());
+        try {
+            if(ngay == ""){
+                date1=new SimpleDateFormat("dd/MM/yyyy").parse(timeStamp);
+            }
+            else{
+                date1=new SimpleDateFormat("dd/MM/yyyy").parse(ngay);
+            }
+        } catch (ParseException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //String[] parts = timeStamp.split("/");
+        for (Saving i : savingList) {
+            try {
+                date2=new SimpleDateFormat("dd/MM/yyyy").parse(i.getStartDate());
+            } catch (ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            String[] words=i.getTerm().split("\\s");
+            Calendar cal = Calendar.getInstance(); 
+            cal.setTime(date2);
+            cal.add(Calendar.MONTH, Integer.parseInt(words[0])); 
+            Date date3 = cal.getTime();
+            if(date3.compareTo(date1)==0){
+                modeRP1.addRow(new Object[]{
+                    i.getId(), i.getAmount(), i.getStartDate(), i.getTerm(),
+                    i.getInterest(), customer(i.getIdCustomer())
+                });
+            } 
+        }
+        for (Loan i : loanList) {
+            try {
+                date2=new SimpleDateFormat("dd/MM/yyyy").parse(i.getStartDate());
+            } catch (ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            String[] words=i.getTerm().split("\\s");
+            Calendar cal = Calendar.getInstance(); 
+            cal.setTime(date2);
+            cal.add(Calendar.MONTH, Integer.parseInt(words[0])); 
+            Date date3 = cal.getTime();
+            if(date3.compareTo(date1)==0){
+                modeRP2.addRow(new Object[]{
+                    i.getId(), i.getAmount(), i.getStartDate(), i.getTerm(),
+                    i.getInterest(), customer(i.getIdCustomer())
+                });
+            }
+        }
+        int tongthu = 0;
+        int tongchi = 0;
+        if(check == 1){
+            // Xem theo ngày
+            for (Saving i : savingList) {
+                try {
+                    date2=new SimpleDateFormat("dd/MM/yyyy").parse(i.getStartDate());
+                } catch (ParseException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String[] words=i.getTerm().split("\\s");
+                Calendar cal = Calendar.getInstance(); 
+                cal.setTime(date2);
+                cal.add(Calendar.MONTH, Integer.parseInt(words[0])); 
+                Date date3 = cal.getTime();
+                if(date3.compareTo(date1)==0){
+                    tongchi += i.getAmount();
+                }
+                if(date2.compareTo(date1)==0){
+                    tongthu += i.getAmount();
+                }
+            }
+        
+            for (Loan i : loanList) {
+                try {
+                    date2=new SimpleDateFormat("dd/MM/yyyy").parse(i.getStartDate());
+                } catch (ParseException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String[] words=i.getTerm().split("\\s");
+                Calendar cal = Calendar.getInstance(); 
+                cal.setTime(date2);
+                cal.add(Calendar.MONTH, Integer.parseInt(words[0])); 
+                Date date3 = cal.getTime();
+                if(date3.compareTo(date1)==0){
+                    tongthu += i.getAmount();
+                }
+                if(date2.compareTo(date1)==0){
+                    tongchi += i.getAmount();
+                }
+            } 
+        }
+        
+        if(check == 2){
+            // Xem theo tháng
+            for (Saving i : savingList) {
+                try {
+                    date2=new SimpleDateFormat("dd/MM/yyyy").parse(i.getStartDate());
+                } catch (ParseException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String[] words=i.getTerm().split("\\s");
+                Calendar cal = Calendar.getInstance(); 
+                cal.setTime(date2);
+                cal.add(Calendar.MONTH, Integer.parseInt(words[0])); 
+                Date date3 = cal.getTime();
+                DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                String[] lstStrDate3 = dateFormat.format(date3).split("/");
+                String[] lstStrDate1 = dateFormat.format(date1).split("/");
+                String[] lstStrDate2 = i.getStartDate().split("/");
+                if(lstStrDate1[1].contains(lstStrDate3[1])){
+                    tongchi += i.getAmount();
+                }
+                if(lstStrDate2[1].contains(lstStrDate1[1]) && lstStrDate2[2].contains(lstStrDate1[2])){
+                    tongthu += i.getAmount();
+                }
+            }
+        
+            for (Loan i : loanList) {
+                try {
+                    date2=new SimpleDateFormat("dd/MM/yyyy").parse(i.getStartDate());
+                } catch (ParseException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String[] words=i.getTerm().split("\\s");
+                Calendar cal = Calendar.getInstance(); 
+                cal.setTime(date2);
+                cal.add(Calendar.MONTH, Integer.parseInt(words[0])); 
+                Date date3 = cal.getTime();
+                DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                String[] lstStrDate3 = dateFormat.format(date3).split("/");
+                String[] lstStrDate1 = dateFormat.format(date1).split("/");
+                String[] lstStrDate2 = i.getStartDate().split("/");
+                if(lstStrDate1[1].contains(lstStrDate3[1]) && lstStrDate1[2].contains(lstStrDate3[2])){
+                    tongthu += i.getAmount();
+                }
+                if(lstStrDate2[1].contains(lstStrDate1[1]) && lstStrDate2[2].contains(lstStrDate1[2])){
+                    tongchi += i.getAmount();
+                }
+            } 
+        }
+        KetQuaThu.setText(Integer.toString(tongthu)+ " Đồng");
+        KetQuaChi.setText(Integer.toString(tongchi)+ " Đồng");
+    }
+    
     //Kết nối DB
     public Connection getConnection() {
         Connection con;
@@ -410,11 +569,17 @@ public class Main extends javax.swing.JFrame {
         btn_report = new javax.swing.JButton();
         btn_spec = new javax.swing.JButton();
         List = new javax.swing.JFrame();
+		Repost = new javax.swing.JFrame();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         saving_list = new javax.swing.JTable();
+		saving_list2 = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
+		jTabbedPane2 = new javax.swing.JTabbedPane();
+		jScrollPane5 = new javax.swing.JScrollPane();
+		jScrollPane6 = new javax.swing.JScrollPane();
         loan_list = new javax.swing.JTable();
+		loan_list2 = new javax.swing.JTable();
         btn_back1 = new javax.swing.JButton();
         Spec = new javax.swing.JFrame();
         btn_back2 = new javax.swing.JButton();
@@ -438,6 +603,17 @@ public class Main extends javax.swing.JFrame {
         txt_username = new javax.swing.JTextField();
         txt_password = new javax.swing.JPasswordField();
         btn_login = new javax.swing.JButton();
+		ngay = new javax.swing.JLabel();
+        NgayThang = new javax.swing.JTextField();
+        OK = new javax.swing.JButton();
+		jPanel1 = new javax.swing.JPanel();
+		jLabelKQThu = new javax.swing.JLabel();
+        KetQuaThu = new javax.swing.JLabel();
+        jLabelKQChi = new javax.swing.JLabel();
+        KetQuaChi = new javax.swing.JLabel();
+        jRadioButton1 = new javax.swing.JRadioButton();
+        jRadioButton2 = new javax.swing.JRadioButton();
+		btn_back3 = new javax.swing.JButton();
 
         Menu.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -461,7 +637,17 @@ public class Main extends javax.swing.JFrame {
 
         btn_report.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btn_report.setText("Báo cáo");
-
+		btn_report.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btn_reportMouseClicked(evt);
+            }
+        });
+        btn_report.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_reportActionPerformed(evt);
+            }
+        });
+		
         btn_spec.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btn_spec.setText("Cấu hình");
         btn_spec.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -631,7 +817,221 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(btn_back1)
                 .addContainerGap())
         );
+		
+		Repost.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		saving_list2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Số tiền", "Ngày gửi", "Kỳ hạn", "Lãi suất", "Người gửi"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Long.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
 
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane5.setViewportView(saving_list2);
+        if (saving_list2.getColumnModel().getColumnCount() > 0) {
+            saving_list2.getColumnModel().getColumn(0).setResizable(false);
+            saving_list2.getColumnModel().getColumn(0).setPreferredWidth(50);
+            saving_list2.getColumnModel().getColumn(1).setResizable(false);
+            saving_list2.getColumnModel().getColumn(1).setPreferredWidth(150);
+            saving_list2.getColumnModel().getColumn(2).setResizable(false);
+            saving_list2.getColumnModel().getColumn(2).setPreferredWidth(150);
+            saving_list2.getColumnModel().getColumn(3).setResizable(false);
+            saving_list2.getColumnModel().getColumn(3).setPreferredWidth(100);
+            saving_list2.getColumnModel().getColumn(4).setResizable(false);
+            saving_list2.getColumnModel().getColumn(4).setPreferredWidth(100);
+            saving_list2.getColumnModel().getColumn(5).setResizable(false);
+            saving_list2.getColumnModel().getColumn(5).setPreferredWidth(150);
+        }
+
+        jTabbedPane2.addTab("Sổ tiết kiệm đến hạn", jScrollPane5);
+		
+		loan_list2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Số tiền", "Ngày vay", "Kỳ hạn", "Lãi suất", "Người vay"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Long.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+		
+		jScrollPane6.setViewportView(loan_list2);
+        if (loan_list2.getColumnModel().getColumnCount() > 0) {
+            loan_list2.getColumnModel().getColumn(0).setResizable(false);
+            loan_list2.getColumnModel().getColumn(0).setPreferredWidth(50);
+            loan_list2.getColumnModel().getColumn(1).setResizable(false);
+            loan_list2.getColumnModel().getColumn(1).setPreferredWidth(150);
+            loan_list2.getColumnModel().getColumn(2).setResizable(false);
+            loan_list2.getColumnModel().getColumn(2).setPreferredWidth(150);
+            loan_list2.getColumnModel().getColumn(3).setResizable(false);
+            loan_list2.getColumnModel().getColumn(3).setPreferredWidth(100);
+            loan_list2.getColumnModel().getColumn(4).setResizable(false);
+            loan_list2.getColumnModel().getColumn(4).setPreferredWidth(100);
+            loan_list2.getColumnModel().getColumn(5).setResizable(false);
+            loan_list2.getColumnModel().getColumn(5).setPreferredWidth(150);
+        }
+
+        jTabbedPane2.addTab("Sổ vay lãi đến hạn", jScrollPane6);
+		
+		ngay.setText("Ngày");
+		
+		NgayThang.setText("");
+		
+		OK.setText("OK");
+		
+        OK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OKActionPerformed(evt);
+            }
+        });
+		OK.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                OKMouseClicked(evt);
+            }
+        });
+		btn_back3.setText("Quay lại");
+		btn_back3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btn_back3MouseClicked(evt);
+            }
+        });
+        btn_back3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_back3ActionPerformed(evt);
+            }
+        });
+		
+		javax.swing.GroupLayout RepostLayout = new javax.swing.GroupLayout(Repost.getContentPane());
+        Repost.getContentPane().setLayout(RepostLayout);
+        RepostLayout.setHorizontalGroup(
+            RepostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RepostLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(RepostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RepostLayout.createSequentialGroup()
+                        .addGap(0, 0, 0)
+                        .addComponent(btn_back3)
+						.addGap(0, 0, Short.MAX_VALUE)
+						.addComponent(ngay)
+						.addGap(0, 0, 10)
+						.addComponent(NgayThang, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addGap(0, 0, 10)
+						.addComponent(OK)))
+                .addContainerGap())
+        );
+        RepostLayout.setVerticalGroup(
+            RepostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RepostLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jTabbedPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+				.addGroup(RepostLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ngay)
+                    .addComponent(NgayThang, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addGap(120, 120, 120)
+                    .addComponent(OK))
+					.addComponent(btn_back3)
+					//.addGap(29, 29, 29)
+                .addContainerGap())
+        );
+		jTabbedPane2.addTab("Tong thu chi", jPanel1);
+		
+		jLabelKQThu.setText("Tổng thu: ");
+
+        jLabelKQChi.setText("Tổng chi: ");
+
+        jRadioButton1.setText("Theo ngày");
+
+        jRadioButton2.setText("Theo tháng");
+		jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton1ActionPerformed(evt);
+            }
+        });
+		jRadioButton2.setText("Theo tháng");
+        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton2ActionPerformed(evt);
+            }
+        });
+		javax.swing.GroupLayout testLayout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(testLayout);
+        testLayout.setHorizontalGroup(
+            testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(testLayout.createSequentialGroup()
+                .addGroup(testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(testLayout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addGroup(testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(testLayout.createSequentialGroup()
+                                .addComponent(jLabelKQChi)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(KetQuaChi))
+                            .addGroup(testLayout.createSequentialGroup()
+                                .addComponent(jLabelKQThu)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(KetQuaThu))))
+                    .addGroup(testLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jRadioButton1)
+                        .addGap(18, 18, 18)
+                        .addComponent(jRadioButton2)))
+                .addContainerGap(187, Short.MAX_VALUE))
+        );
+        testLayout.setVerticalGroup(
+            testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(testLayout.createSequentialGroup()
+                .addGap(53, 53, 53)
+                .addGroup(testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelKQThu)
+                    .addComponent(KetQuaThu))
+                .addGap(37, 37, 37)
+                .addGroup(testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelKQChi)
+                    .addComponent(KetQuaChi))
+                .addGap(40, 40, 40)
+                .addGroup(testLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jRadioButton1)
+                    .addComponent(jRadioButton2))
+                .addContainerGap(96, Short.MAX_VALUE))
+        );
+		
         Spec.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btn_back2.setText("Quay lại");
@@ -924,13 +1324,61 @@ public class Main extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                              
+        jRadioButton1.setSelected(true);
+        jRadioButton2.setSelected(false);
+        String text = NgayThang.getText();
+        if(!text.isEmpty()){
+            if(checkngaythang(text)){
+                showRepost(text, 1);
+                isDataUpdated = true;;
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Sai định dạng ngày tháng. Ngày tháng có dạng dd/MM/yyyy");
+            }
+        }
+        else{
+            showRepost("", 1);
+            isDataUpdated = true;;
+        }
+    }    
+    
+    private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                              
+        jRadioButton1.setSelected(false);
+        jRadioButton2.setSelected(true);
+        String text = NgayThang.getText();
+        if(!text.isEmpty()){
+            if(checkngaythang(text)){
+                showRepost(text, 2);
+                isDataUpdated = true;;
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Sai định dạng ngày tháng. Ngày tháng có dạng dd/MM/yyyy");
+            }
+        }
+        else{
+            showRepost("", 2);
+            isDataUpdated = true;;
+        }
+    }
+    
     private void btn_listActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_listActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btn_listActionPerformed
 
+    private void btn_reportActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        // TODO add your handling code here:
+    } 
+    private void OKActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        // TODO add your handling code here:
+    }
+    
     private void btn_back1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_back1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btn_back1ActionPerformed
+    private void btn_back3ActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        // TODO add your handling code here:
+    } 
     //Nhấn Đăng nhập
     private void btn_loginMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_loginMouseClicked
         // TODO add your handling code here:
@@ -975,6 +1423,34 @@ public class Main extends javax.swing.JFrame {
         List.setLocationRelativeTo(null);
         showList();
     }//GEN-LAST:event_btn_listMouseClicked
+    
+    private void btn_reportMouseClicked(java.awt.event.MouseEvent evt) {                                      
+        // TODO add your handling code here:
+        Repost.setVisible(true);
+        Repost.setLocationRelativeTo(null);
+        jRadioButton1.setSelected(true);
+        showRepost("", 1);
+    }  
+    // Chọn ngày tháng
+    private void OKMouseClicked(java.awt.event.MouseEvent evt) {                                      
+        // TODO add your handling code here:
+        String text = NgayThang.getText();
+        if(!text.isEmpty()){
+            if(checkngaythang(text)){
+                showRepost(text, 1);
+                isDataUpdated = true;;
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Sai định dạng ngày tháng. Ngày tháng có dạng dd/MM/yyyy");
+            }
+        }
+        else {
+            showRepost("", 1);
+            isDataUpdated = true;;
+        }
+        
+    }
+    
     //Nhấn Cấu hình
     private void btn_specMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_specMouseClicked
         // TODO add your handling code here:
@@ -987,6 +1463,11 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
         List.setVisible(false);
     }//GEN-LAST:event_btn_back1MouseClicked
+    
+    private void btn_back3MouseClicked(java.awt.event.MouseEvent evt) {                                       
+        // TODO add your handling code here:
+        Repost.setVisible(false);
+    } 
     //Nhấn quay lại tại Cấu hình
     private void btn_back2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_back2MouseClicked
         // TODO add your handling code here:
@@ -1148,11 +1629,24 @@ public class Main extends javax.swing.JFrame {
             }
         });
     }
+    
+    private boolean checkngaythang(String ngay){
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        df.setLenient(false);
+        Date check = null;
+        try {
+            check = df.parse(ngay);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JFrame List;
     private javax.swing.JFrame Menu;
     private javax.swing.JFrame Spec;
+	private javax.swing.JFrame Repost;
     private javax.swing.JButton add_loan;
     private javax.swing.JButton add_saving;
     private javax.swing.JButton btn_back1;
@@ -1176,13 +1670,29 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+	private javax.swing.JScrollPane jScrollPane5;
+	private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JTabbedPane jTabbedPane1;
+	private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTable loan_interest;
     private javax.swing.JTable loan_list;
+	private javax.swing.JTable loan_list2;
     private javax.swing.JTable saving_interest;
     private javax.swing.JTable saving_list;
+	private javax.swing.JTable saving_list2;
     private javax.swing.JPasswordField txt_password;
     private javax.swing.JTextField txt_username;
     private javax.swing.JComboBox<String> versionCB;
+	private javax.swing.JTextField NgayThang;
+    private javax.swing.JButton OK;
+    private javax.swing.JLabel ngay;
+	private javax.swing.JPanel jPanel1;
+	private javax.swing.JLabel jLabelKQChi;
+    private javax.swing.JLabel jLabelKQThu;
+	private javax.swing.JLabel KetQuaChi;
+    private javax.swing.JLabel KetQuaThu;
+	private javax.swing.JRadioButton jRadioButton1;
+    private javax.swing.JRadioButton jRadioButton2;
+	private javax.swing.JButton btn_back3;
     // End of variables declaration//GEN-END:variables
 }
