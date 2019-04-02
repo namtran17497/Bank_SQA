@@ -1,13 +1,15 @@
 -- phpMyAdmin SQL Dump
--- version 4.6.5.2
+-- version 4.8.5
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Mar 28, 2019 at 03:33 PM
--- Server version: 10.1.21-MariaDB
--- PHP Version: 5.6.30
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th4 02, 2019 lúc 09:05 PM
+-- Phiên bản máy phục vụ: 10.1.38-MariaDB
+-- Phiên bản PHP: 7.3.3
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -17,13 +19,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `bank`
+-- Cơ sở dữ liệu: `bank`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `customer`
+-- Cấu trúc bảng cho bảng `customer`
 --
 
 CREATE TABLE `customer` (
@@ -33,7 +35,7 @@ CREATE TABLE `customer` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `customer`
+-- Đang đổ dữ liệu cho bảng `customer`
 --
 
 INSERT INTO `customer` (`id`, `name`, `info`) VALUES
@@ -44,31 +46,31 @@ INSERT INTO `customer` (`id`, `name`, `info`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `loan`
+-- Cấu trúc bảng cho bảng `loan`
 --
 
 CREATE TABLE `loan` (
   `id` int(4) NOT NULL,
   `amount` bigint(100) NOT NULL,
-  `starDate` varchar(30) NOT NULL,
+  `start_date` date NOT NULL,
   `term` varchar(30) CHARACTER SET utf8 COLLATE utf8_vietnamese_ci NOT NULL,
   `interest` varchar(5) NOT NULL,
   `idCustomer` int(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `loan`
+-- Đang đổ dữ liệu cho bảng `loan`
 --
 
-INSERT INTO `loan` (`id`, `amount`, `starDate`, `term`, `interest`, `idCustomer`) VALUES
-(1, 2000000, '08/02/2019', '6 tháng', '6.50', 1),
-(2, 20000000, '01/01/2019', '12 tháng', '7.00', 3),
-(3, 5000000, '09/02/2019', '1 tháng', '6.00', 2);
+INSERT INTO `loan` (`id`, `amount`, `start_date`, `term`, `interest`, `idCustomer`) VALUES
+(1, 2000000, '2019-02-08', '6 tháng', '6.50', 1),
+(2, 20000000, '2019-03-15', '12 tháng', '7.00', 3),
+(3, 5000000, '2019-03-28', '1 tháng', '6.00', 2);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `loan_interest`
+-- Cấu trúc bảng cho bảng `loan_interest`
 --
 
 CREATE TABLE `loan_interest` (
@@ -80,7 +82,7 @@ CREATE TABLE `loan_interest` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `loan_interest`
+-- Đang đổ dữ liệu cho bảng `loan_interest`
 --
 
 INSERT INTO `loan_interest` (`id`, `term`, `amount`, `interest`, `version`) VALUES
@@ -103,31 +105,31 @@ INSERT INTO `loan_interest` (`id`, `term`, `amount`, `interest`, `version`) VALU
 -- --------------------------------------------------------
 
 --
--- Table structure for table `saving`
+-- Cấu trúc bảng cho bảng `saving`
 --
 
 CREATE TABLE `saving` (
   `id` int(4) NOT NULL,
   `amount` bigint(100) NOT NULL,
-  `start_date` varchar(30) NOT NULL,
+  `start_date` varchar(10) NOT NULL,
   `term` varchar(30) CHARACTER SET utf8 COLLATE utf8_vietnamese_ci NOT NULL,
   `interest` varchar(5) NOT NULL,
   `idCustomer` int(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `saving`
+-- Đang đổ dữ liệu cho bảng `saving`
 --
 
 INSERT INTO `saving` (`id`, `amount`, `start_date`, `term`, `interest`, `idCustomer`) VALUES
-(1, 1000000000, '17/04/2018', '12 tháng', '7.70', 1),
-(2, 20000000, '12/09/2018', '6 tháng', '7.60', 2),
-(3, 10000000000, '25/09/2018', '12 tháng', '7.80', 3);
+(1, 1000000000, '2018-04-17', '12 tháng', '7.70', 1),
+(2, 20000000, '2018-09-12', '6 tháng', '7.60', 2),
+(3, 10000000000, '2018-09-25', '12 tháng', '7.80', 3);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `saving_interest`
+-- Cấu trúc bảng cho bảng `saving_interest`
 --
 
 CREATE TABLE `saving_interest` (
@@ -139,7 +141,7 @@ CREATE TABLE `saving_interest` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `saving_interest`
+-- Đang đổ dữ liệu cho bảng `saving_interest`
 --
 
 INSERT INTO `saving_interest` (`id`, `term`, `amount`, `interest`, `version`) VALUES
@@ -165,7 +167,7 @@ INSERT INTO `saving_interest` (`id`, `term`, `amount`, `interest`, `version`) VA
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Cấu trúc bảng cho bảng `user`
 --
 
 CREATE TABLE `user` (
@@ -175,25 +177,25 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `user`
+-- Đang đổ dữ liệu cho bảng `user`
 --
 
 INSERT INTO `user` (`id`, `username`, `password`) VALUES
 (1, 'namtran', '12345678');
 
 --
--- Indexes for dumped tables
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `customer`
+-- Chỉ mục cho bảng `customer`
 --
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `info` (`info`);
 
 --
--- Indexes for table `loan`
+-- Chỉ mục cho bảng `loan`
 --
 ALTER TABLE `loan`
   ADD PRIMARY KEY (`id`),
@@ -201,13 +203,13 @@ ALTER TABLE `loan`
   ADD KEY `term` (`term`);
 
 --
--- Indexes for table `loan_interest`
+-- Chỉ mục cho bảng `loan_interest`
 --
 ALTER TABLE `loan_interest`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `saving`
+-- Chỉ mục cho bảng `saving`
 --
 ALTER TABLE `saving`
   ADD PRIMARY KEY (`id`),
@@ -215,67 +217,74 @@ ALTER TABLE `saving`
   ADD KEY `term` (`term`);
 
 --
--- Indexes for table `saving_interest`
+-- Chỉ mục cho bảng `saving_interest`
 --
 ALTER TABLE `saving_interest`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `user`
+-- Chỉ mục cho bảng `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `customer`
+-- AUTO_INCREMENT cho bảng `customer`
 --
 ALTER TABLE `customer`
   MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
 --
--- AUTO_INCREMENT for table `loan`
+-- AUTO_INCREMENT cho bảng `loan`
 --
 ALTER TABLE `loan`
   MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
 --
--- AUTO_INCREMENT for table `loan_interest`
+-- AUTO_INCREMENT cho bảng `loan_interest`
 --
 ALTER TABLE `loan_interest`
   MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=199;
+
 --
--- AUTO_INCREMENT for table `saving`
+-- AUTO_INCREMENT cho bảng `saving`
 --
 ALTER TABLE `saving`
   MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
 --
--- AUTO_INCREMENT for table `saving_interest`
+-- AUTO_INCREMENT cho bảng `saving_interest`
 --
 ALTER TABLE `saving_interest`
   MODIFY `id` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=261;
+
 --
--- AUTO_INCREMENT for table `user`
+-- AUTO_INCREMENT cho bảng `user`
 --
 ALTER TABLE `user`
   MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
 --
--- Constraints for dumped tables
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `loan`
+-- Các ràng buộc cho bảng `loan`
 --
 ALTER TABLE `loan`
   ADD CONSTRAINT `loan_ibfk_1` FOREIGN KEY (`idCustomer`) REFERENCES `customer` (`id`) ON DELETE NO ACTION;
 
 --
--- Constraints for table `saving`
+-- Các ràng buộc cho bảng `saving`
 --
 ALTER TABLE `saving`
   ADD CONSTRAINT `saving_ibfk_1` FOREIGN KEY (`idCustomer`) REFERENCES `customer` (`id`) ON DELETE NO ACTION;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

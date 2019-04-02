@@ -1,2 +1,3 @@
-namtran	
+﻿namtran	
 12345678
+//sao không thấy giao diện của phần báo cáo đâu?
